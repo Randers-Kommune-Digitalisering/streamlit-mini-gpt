@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
 from page.assistant import display_hjælpemiddel_chat
+from page.upload_files import upload_files
 
 
 st.set_page_config(page_title="Hjælpemiddelområdets Mini GPT", page_icon="assets/favicon.ico")
@@ -10,9 +11,9 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "Hjælpemiddelområdets Mini GPT",
-        ["Hjælpemiddelområdets Assistant Chat"],
+        ["Hjælpemiddelområdets Assistant Chat", "Upload Dokumenter"],
         default_index=0,
-        icons=['activity'],
+        icons=['activity', 'bi bi-file-earmark-arrow-up'],
         menu_icon="bi bi-robot",
         styles={
             "container": {"padding": "5px", "background-color": "#f0f0f0"},
@@ -25,3 +26,5 @@ with st.sidebar:
 
 if selected == "Hjælpemiddelområdets Assistant Chat":
     display_hjælpemiddel_chat()
+elif selected == "Upload Dokumenter":
+    upload_files()
