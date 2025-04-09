@@ -35,3 +35,37 @@ def map_internal_references_to_file_ids(assistant_message):
                         internal_reference = annotation.text.split("†")[0].strip("【")
                         reference_to_file_id[internal_reference] = annotation.file_citation.file_id
     return reference_to_file_id
+
+
+def get_vector_store_name(vector_store_id):
+    vector_stores = fetch_vector_stores()
+    return vector_stores.get(vector_store_id, vector_store_id)
+
+
+def list_files_in_vector_store(vector_store_id):
+    client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
+    path = f"/openai/vector_stores/{vector_store_id}/files?api-version=2025-03-01-preview&limit=100"
+
+    try:
+        vector_store_name = get_vector_store_name(vector_store_id)
+        st.write(f"Henter filer fra vector store: '{vector_store_name}'...")
+        response = client.make_request(path=path, method="GET")
+        st.write(f"Filer i vector store: '{vector_store_name}'")
+        st.write(client.base_url)
+        return response
+    except Exception as e:
+        st.error(f"Kunne ikke hente filer fra vector store '{vector_store_id}'. Fejl: {e}")
+        return None
+
+
+def fetch_vector_stores():
+    client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
+    path = "/openai/vector_stores?api-version=2025-03-01-preview"
+
+    try:
+        response = client.make_request(path=path, method="GET")
+        vector_stores = response.get("data", [])
+        return {store["id"]: store["name"] for store in vector_stores}
+    except Exception as e:
+        st.error(f"Kunne ikke hente vector stores. Fejl: {e}")
+        return {}
