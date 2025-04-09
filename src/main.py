@@ -12,8 +12,8 @@ with st.sidebar:
         "Hjælpemiddelområdets Mini GPT",
         ["Hjælpemiddelområdets Assistant Chat"],
         default_index=0,
-        icons=['list-task', 'activity', 'cloud-upload'],
-        menu_icon="cast",
+        icons=['activity'],
+        menu_icon="bi bi-robot",
         styles={
             "container": {"padding": "5px", "background-color": "#f0f0f0"},
             "icon": {"color": "#4a4a4a", "font-size": "18px"},
