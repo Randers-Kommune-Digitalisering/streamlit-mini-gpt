@@ -32,15 +32,20 @@ def upload_files():
                 st.warning("Ingen Vector Store fundet.")
         elif content_tabs == 'Upload':
             st.write("Upload dine filer her")
-            uploaded_file = st.file_uploader("Vælg en fil for at uploade", type=["txt", "json", "csv", "pdf"])
+            uploaded_files = st.file_uploader(
+                "Vælg filer for at uploade",
+                type=["txt", "json", "csv", "pdf", "docx"],
+                accept_multiple_files=True
+            )
 
-            if uploaded_file is not None:
+            if uploaded_files:
                 if st.button("Upload"):
-                    with st.spinner("Uploader fil..."):
-                        st.write("Uploader filen, vent venligst...")
-                        result = upload_file(uploaded_file)
-                        if result:
-                            st.success("Filen blev uploadet succesfuldt!")
+                    with st.spinner("Uploader filer..."):
+                        for uploaded_file in uploaded_files:
+                            st.write(f"Uploader filen: {uploaded_file.name}")
+                            result = upload_file(uploaded_file)
+                            if result:
+                                st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!")
 
     except Exception as e:
         st.error(f'En fejl opstod: {e}')
