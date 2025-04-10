@@ -51,7 +51,6 @@ def list_files_in_vector_store(vector_store_id):
         st.write(f"Henter filer fra vector store: '{vector_store_name}'...")
         response = client.make_request(path=path, method="GET")
         st.write(f"Filer i vector store: '{vector_store_name}'")
-        st.write(client.base_url)
         return response
     except Exception as e:
         st.error(f"Kunne ikke hente filer fra vector store '{vector_store_id}'. Fejl: {e}")
@@ -69,3 +68,20 @@ def fetch_vector_stores():
     except Exception as e:
         st.error(f"Kunne ikke hente vector stores. Fejl: {e}")
         return {}
+
+
+def upload_file(file):
+    client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
+    path = "/openai/files?api-version=2024-10-21"
+    files = {
+        "file": (file.name, file),
+        "purpose": (None, "assistants"),
+    }
+
+    try:
+        st.write(f"Starter upload af fil: {file.name}...")
+        response = client.make_request(path=path, method="POST", files=files)
+        return response
+    except Exception as e:
+        st.error(f"Kunne ikke uploade filen {file.name}. Fejl: {e}")
+        return None
