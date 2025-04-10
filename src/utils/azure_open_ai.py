@@ -85,3 +85,24 @@ def upload_file(file):
     except Exception as e:
         st.error(f"Kunne ikke uploade filen {file.name}. Fejl: {e}")
         return None
+
+
+def add_file_to_vector_store(vector_store_id, file_id):
+    client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
+    path = f"/openai/vector_stores/{vector_store_id}/files?api-version=2025-03-01-preview"
+    payload = {
+        "file_id": file_id
+    }
+
+    vector_store_name = get_vector_store_name(vector_store_id)
+    files = fetch_files()
+    file_name = files.get(file_id, file_id)
+
+    try:
+        st.write(f"Tilføjer fil '{file_name}' til vector store '{vector_store_name}'...")
+        response = client.make_request(path=path, method="POST", json=payload)
+        st.write(f"Fil '{file_name}' blev tilføjet til vector store '{vector_store_name}'.")
+        return response
+    except Exception as e:
+        st.error(f"Kunne ikke tilføje filen '{file_name}' til vector store '{vector_store_name}'. Fejl: {e}")
+        return None
