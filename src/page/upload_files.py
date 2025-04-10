@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_antd_components as sac
-from utils.azure_open_ai import list_files_in_vector_store, fetch_vector_stores
+from utils.azure_open_ai import list_files_in_vector_store, fetch_vector_stores, upload_file
 
 
 def upload_files():
@@ -9,7 +9,7 @@ def upload_files():
     with col_1:
         content_tabs = sac.tabs([
             sac.TabsItem('List Files', tag='List Files', icon='bi bi-file-earmark-word'),
-            sac.TabsItem('Upload', tag='Upload', icon='upload')
+            sac.TabsItem('Upload', tag='Upload', icon='upload'),
         ], color='dark', size='md', position='top', align='start', use_container_width=True)
 
     try:
@@ -31,7 +31,16 @@ def upload_files():
             else:
                 st.warning("Ingen Vector Store fundet.")
         elif content_tabs == 'Upload':
-            st.write("Upload dokumenter")
+            st.write("Upload dine filer her")
+            uploaded_file = st.file_uploader("Vælg en fil for at uploade", type=["txt", "json", "csv", "pdf"])
+
+            if uploaded_file is not None:
+                if st.button("Upload"):
+                    with st.spinner("Uploader fil..."):
+                        st.write("Uploader filen, vent venligst...")
+                        result = upload_file(uploaded_file)
+                        if result:
+                            st.success("Filen blev uploadet succesfuldt!")
 
     except Exception as e:
         st.error(f'En fejl opstod: {e}')
