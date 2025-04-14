@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_antd_components as sac
-from utils.azure_open_ai import fetch_vector_stores, upload_file, fetch_files, add_file_to_vector_store
+from utils.azure_open_ai import fetch_vector_stores, add_file_to_assistant, fetch_files, add_file_to_vector_store
 from utils.config import HJAELPEMIDDEL_VECTOR_ID
 
 
@@ -10,7 +10,7 @@ def upload_files():
     with col_1:
         content_tabs = sac.tabs([
             sac.TabsItem('Upload', tag='Upload', icon='upload'),
-            sac.TabsItem('TIlføj fil til Hjælpemiddel-Assistenten', tag='TIlføj fil til Hjælpemiddel-Assistenten', icon='bi bi-file-earmark-x'),
+            sac.TabsItem('TIlføj fil til Hjælpemiddel-Assistenten', tag='TIlføj', icon='bi bi-file-earmark-text'),
         ], color='dark', size='md', position='top', align='start', use_container_width=True)
 
     try:
@@ -28,12 +28,15 @@ def upload_files():
                     with st.spinner("Uploader filer..."):
                         for uploaded_file in uploaded_files:
                             st.write(f"Uploader filen: {uploaded_file.name}")
-                            result = upload_file(uploaded_file)
+                            result = add_file_to_assistant(uploaded_file)
                             if result:
-                                st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!")
+                                st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
+                            else:
+                                st.error(f"Fejl under upload af fil '{uploaded_file.name}'.", icon="❌")
 
         elif content_tabs == 'TIlføj fil til Hjælpemiddel-Assistenten':
-            st.write("Tilføj en eksisterende fil til din vector store")
+            st.write("Tilføj eksisterende filer til Hjælpemiddel-Assistenten")
+
             specific_vector_store_id = HJAELPEMIDDEL_VECTOR_ID
 
             if specific_vector_store_id:
@@ -57,15 +60,18 @@ def upload_files():
             if vector_store_id:
                 files = fetch_files()
                 if files:
-                    file_name = st.selectbox("Vælg en fil", options=list(files.values()), help="Vælg en fil fra listen over tilgængelige filer.")
-                    file_id = next((id for id, name in files.items() if name == file_name), None)
+                    selected_files = st.multiselect("Vælg filer", options=list(files.values()), help="Vælg de filer, du vil tilføje til Hjælpemiddel Assistenten.", placeholder="Vælg filer, du vil tilføje")
+                    selected_file_ids = [id for id, name in files.items() if name in selected_files]
 
-                    if file_id:
-                        if st.button("Tilføj fil"):
-                            with st.spinner("Tilføjer fil..."):
-                                result = add_file_to_vector_store(vector_store_id, file_id)
-                                if result:
-                                    st.success("Filen blev tilføjet succesfuldt!")
+                    if selected_file_ids:
+                        if st.button("Tilføj valgte filer"):
+                            with st.spinner("Tilføjer filer..."):
+                                for file_id in selected_file_ids:
+                                    result = add_file_to_vector_store(vector_store_id, file_id)
+                                    if result:
+                                        st.success("Filen blev tilføjet succesfuldt!", icon="✅")
+                                    else:
+                                        st.error("Fejl under tilføjelse af fil.", icon="❌")
                 else:
                     st.warning("Ingen filer fundet. Upload filer først.")
 

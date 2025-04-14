@@ -70,7 +70,7 @@ def fetch_vector_stores():
         return {}
 
 
-def upload_file(file):
+def add_file_to_assistant(file):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
     path = "/openai/files?api-version=2024-10-21"
     files = {
