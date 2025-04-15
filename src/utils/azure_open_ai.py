@@ -106,3 +106,20 @@ def add_file_to_vector_store(vector_store_id, file_id):
     except Exception as e:
         st.error(f"Kunne ikke tilføje filen '{file_name}' til vector store '{vector_store_name}'. Fejl: {e}")
         return None
+
+
+def delete_file_from_vector_store(vector_store_id, file_id):
+    client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
+    path = f"/openai/vector_stores/{vector_store_id}/files/{file_id}?api-version=2025-03-01-preview"
+
+    files = fetch_files()
+    file_name = files.get(file_id, file_id)
+
+    try:
+        st.write(f"Sletter fil '{file_name}' fra vector store '{vector_store_id}'...")
+        response = client.make_request(path=path, method="DELETE")
+        st.write(f"Fil '{file_name}' blev slettet fra vector store '{vector_store_id}'.")
+        return response
+    except Exception as e:
+        st.error(f"Kunne ikke slette filen '{file_name}' fra vector store '{vector_store_id}'. Fejl: {e}")
+        return None
