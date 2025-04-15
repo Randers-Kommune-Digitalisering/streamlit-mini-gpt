@@ -8,6 +8,7 @@ client_assistant = get_azure_openai_assistant()
 
 
 def process_user_input(user_input, files, display_in_chat=True):
+
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     if display_in_chat:
@@ -65,7 +66,11 @@ def process_user_input(user_input, files, display_in_chat=True):
                                     f"【{internal_reference}†source】", f"[{idx}]"
                                 )
 
-                        st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": assistant_response,
+                            "footnotes": footnotes
+                        })
 
                         if display_in_chat:
                             with st.chat_message("assistant"):
@@ -112,6 +117,9 @@ def display_hjælpemiddel_chat():
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
+            if message["role"] == "assistant" and "footnotes" in message:
+                for footnote in message["footnotes"]:
+                    st.markdown(f"- {footnote}")
 
     user_input = st.chat_input("Skriv dit spørgsmål her...")
     if user_input:
