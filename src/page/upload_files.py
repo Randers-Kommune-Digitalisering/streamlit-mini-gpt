@@ -5,7 +5,8 @@ from utils.azure_open_ai import (
     add_file_to_assistant,
     fetch_files,
     add_file_to_vector_store,
-    delete_file_from_vector_store
+    delete_file_from_vector_store,
+    fetch_files_from_vector_store
 )
 from utils.config import HJAELPEMIDDEL_VECTOR_ID
 
@@ -106,9 +107,14 @@ def upload_files():
                     vector_store_id = None
 
             if vector_store_id:
-                files = fetch_files()
+                files = fetch_files_from_vector_store(vector_store_id)
                 if files:
-                    selected_files = st.multiselect("Vælg filer", options=list(files.values()), help="Vælg de filer, du vil slette", placeholder="Vælg filer, du vil slette")
+                    selected_files = st.multiselect(
+                        "Vælg filer", 
+                        options=list(files.values()), 
+                        help="Vælg de filer, du vil slette", 
+                        placeholder="Vælg filer, du vil slette"
+                    )
                     selected_file_ids = [id for id, name in files.items() if name in selected_files]
 
                     if selected_file_ids:
