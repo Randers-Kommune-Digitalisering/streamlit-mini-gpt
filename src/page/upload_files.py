@@ -110,9 +110,9 @@ def upload_files():
                 files = fetch_files_from_vector_store(vector_store_id)
                 if files:
                     selected_files = st.multiselect(
-                        "Vælg filer", 
-                        options=list(files.values()), 
-                        help="Vælg de filer, du vil slette", 
+                        "Vælg filer",
+                        options=list(files.values()),
+                        help="Vælg de filer, du vil slette",
                         placeholder="Vælg filer, du vil slette"
                     )
                     selected_file_ids = [id for id, name in files.items() if name in selected_files]
