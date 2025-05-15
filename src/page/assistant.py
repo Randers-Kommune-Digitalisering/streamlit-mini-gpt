@@ -92,7 +92,7 @@ def process_user_input(user_input, files, display_in_chat=True):
 
 def display_assistant_chat():
     st.title(f"Chat med {ASSISTANT_NAME}")
-    st.write("Velkommen til. Start en samtale nedenfor.")
+    st.subheader("Start en samtale nedenfor :blush:")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -106,7 +106,7 @@ def display_assistant_chat():
         cols = st.columns(len(PREDEFINED_QUESTIONS))
         for i, question in enumerate(PREDEFINED_QUESTIONS):
             with cols[i]:
-                if st.button(question.strip(), type="primary"):
+                if st.button(question.strip(), use_container_width=True):
                     process_user_input(question.strip(), files, display_in_chat=False)
 
     for message in st.session_state.messages:
