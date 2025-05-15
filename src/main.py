@@ -12,7 +12,7 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         str(ASSISTANT_NAME).capitalize(),
-        ["Chat", "Håndter dokumenter"],
+        ["Chat", "Dokumenter"],
         default_index=0,
         icons=['activity', 'bi bi-file-earmark-arrow-up'],
         menu_icon="bi bi-robot",
@@ -27,5 +27,5 @@ with st.sidebar:
 
 if selected == "Chat":
     display_assistant_chat()
-elif selected == "Håndter dokumenter":
+elif selected == "Dokumenter":
     upload_files()

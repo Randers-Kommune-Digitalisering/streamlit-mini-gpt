@@ -19,9 +19,9 @@ def upload_files():
 
     with col_1:
         content_tabs = sac.tabs([
-            sac.TabsItem('Upload', tag='Upload', icon='upload'),
-            sac.TabsItem('Tilføj filer', tag='Tilføj', icon='bi bi-file-earmark-text'),
-            sac.TabsItem('Slet filer', tag=':delete:', icon='bi bi-trash3')
+            sac.TabsItem('Upload', icon='upload'),
+            sac.TabsItem('Tilføj filer',  icon='bi bi-file-earmark-text'),
+            sac.TabsItem('Slet filer',  icon='bi bi-trash3')
         ], color='teal', size='md', position='top', align='start', use_container_width=True)
 
     try:
