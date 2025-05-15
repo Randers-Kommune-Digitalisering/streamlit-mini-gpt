@@ -135,12 +135,7 @@ def fetch_files_from_vector_store(vector_store_id):
         vector_store_files = response.get("data", [])
         all_files = fetch_files()
 
-        matched_files = {
-            file["id"]: all_files.get(file["id"], f"Ukendt fil ({file['id']})")
-            for file in vector_store_files
-        }
-
-        return matched_files
+        return {file["id"]: all_files.get(file["id"], f"Ukendt fil ({file['id']})") for file in vector_store_files}
     except Exception as e:
         st.error(f"Kunne ikke hente filer fra vector store '{vector_store_id}'. Fejl: {e}")
         return {}
