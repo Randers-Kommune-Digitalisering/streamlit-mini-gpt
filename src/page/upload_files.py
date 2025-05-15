@@ -82,7 +82,10 @@ def upload_files():
                     files = all_files
 
                 if files:
-                    selected_files = st.multiselect("Vælg filer", options=list(files.values()), help=f"Vælg de filer, du vil tilføje til {ASSISTANT_NAME}.", placeholder="Vælg filer, du vil tilføje")
+                    selected_files = st.multiselect("Vælg filer",
+                                                    options=list(files.values()),
+                                                    help=f"Vælg de filer, du vil tilføje til {ASSISTANT_NAME}.",
+                                                    placeholder="Vælg filer, du vil tilføje")
                     selected_file_ids = [id for id, name in files.items() if name in selected_files]
 
                     if selected_file_ids:

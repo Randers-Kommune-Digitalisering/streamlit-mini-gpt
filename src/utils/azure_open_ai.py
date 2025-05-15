@@ -19,6 +19,15 @@ def fetch_files():
     try:
         response = client.make_request(path=f"/openai/files?api-version={AZURE_API_VERSION_FILES}", method="GET")
         files = response.get("data", [])
+        filename_count = {}
+        for file in files:
+            filename = file["filename"]
+            if filename in filename_count:
+                filename_count[filename] += 1
+                file["filename"] = f"{filename} ({filename_count[filename]})"
+            else:
+                filename_count[filename] = 1
+
         return {file["id"]: file["filename"] for file in files}
     except Exception as e:
         st.error(f"Kunne ikke hente filer. Fejl: {e}")
