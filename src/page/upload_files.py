@@ -8,7 +8,7 @@ from utils.azure_open_ai import (
     delete_file_from_vector_store,
     fetch_files_from_vector_store
 )
-from utils.config import HJAELPEMIDDEL_VECTOR_ID
+from utils.config import VECTOR_STORE_ID
 
 
 def upload_files():
@@ -45,7 +45,7 @@ def upload_files():
         elif content_tabs == 'TIlføj filer':
             st.write("Tilføj eksisterende filer til Hjælpemiddel-Assistenten")
 
-            specific_vector_store_id = HJAELPEMIDDEL_VECTOR_ID
+            specific_vector_store_id = VECTOR_STORE_ID
 
             if specific_vector_store_id:
                 vector_stores = fetch_vector_stores()
@@ -86,7 +86,7 @@ def upload_files():
         elif content_tabs == 'Slet filer':
             st.write("Slet filer fra Hjælpemiddel-Assistenten")
 
-            specific_vector_store_id = HJAELPEMIDDEL_VECTOR_ID
+            specific_vector_store_id = VECTOR_STORE_ID
 
             if specific_vector_store_id:
                 vector_stores = fetch_vector_stores()

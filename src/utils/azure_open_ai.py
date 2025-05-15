@@ -1,6 +1,6 @@
 from openai import AzureOpenAI
 from utils.api_requests import APIClient
-from utils.config import AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY
+from utils.config import AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_API_VERSION, AZURE_API_VERSION_FILES, AZURE_API_VERSION_VECTORS, AZURE_API_VERSION_MODELS, AZURE_API_VERSION_EMBEDDINGS
 import streamlit as st
 
 
@@ -8,7 +8,7 @@ def get_azure_openai_assistant():
     client_assistant = AzureOpenAI(
         azure_endpoint=AZURE_OPENAI_ENDPOINT,
         api_key=AZURE_OPENAI_KEY,
-        api_version="2024-05-01-preview"
+        api_version=AZURE_API_VERSION
     )
     return client_assistant
 
@@ -17,7 +17,7 @@ def fetch_files():
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
 
     try:
-        response = client.make_request(path="/openai/files?api-version=2024-10-21", method="GET")
+        response = client.make_request(path=f"/openai/files?api-version={AZURE_API_VERSION_FILES}", method="GET")
         files = response.get("data", [])
         return {file["id"]: file["filename"] for file in files}
     except Exception as e:
@@ -44,7 +44,7 @@ def get_vector_store_name(vector_store_id):
 
 def list_files_in_vector_store(vector_store_id):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = f"/openai/vector_stores/{vector_store_id}/files?api-version=2025-03-01-preview&limit=100"
+    path = f"/openai/vector_stores/{vector_store_id}/files?api-version={AZURE_API_VERSION_VECTORS}&limit=100"
 
     try:
         vector_store_name = get_vector_store_name(vector_store_id)
@@ -59,7 +59,7 @@ def list_files_in_vector_store(vector_store_id):
 
 def fetch_vector_stores():
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = "/openai/vector_stores?api-version=2025-03-01-preview"
+    path = f"/openai/vector_stores?api-version={AZURE_API_VERSION_VECTORS}"
 
     try:
         response = client.make_request(path=path, method="GET")
@@ -72,7 +72,7 @@ def fetch_vector_stores():
 
 def add_file_to_assistant(file):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = "/openai/files?api-version=2024-10-21"
+    path = f"/openai/files?api-version={AZURE_API_VERSION_FILES}"
     files = {
         "file": (file.name, file),
         "purpose": (None, "assistants"),
@@ -89,7 +89,7 @@ def add_file_to_assistant(file):
 
 def add_file_to_vector_store(vector_store_id, file_id):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = f"/openai/vector_stores/{vector_store_id}/files?api-version=2025-03-01-preview"
+    path = f"/openai/vector_stores/{vector_store_id}/files?api-version={AZURE_API_VERSION_VECTORS}"
     payload = {
         "file_id": file_id
     }
@@ -110,7 +110,7 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 def delete_file_from_vector_store(vector_store_id, file_id):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = f"/openai/vector_stores/{vector_store_id}/files/{file_id}?api-version=2025-03-01-preview"
+    path = f"/openai/vector_stores/{vector_store_id}/files/{file_id}?api-version={AZURE_API_VERSION_VECTORS}"
 
     vector_store_name = get_vector_store_name(vector_store_id)
     files = fetch_files()
@@ -128,7 +128,7 @@ def delete_file_from_vector_store(vector_store_id, file_id):
 
 def fetch_files_from_vector_store(vector_store_id):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
-    path = f"/openai/vector_stores/{vector_store_id}/files?api-version=2025-03-01-preview&limit=100"
+    path = f"/openai/vector_stores/{vector_store_id}/files?api-version={AZURE_API_VERSION_VECTORS}&limit=100"
 
     try:
         response = client.make_request(path=path, method="GET")

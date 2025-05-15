@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 from st_copy_to_clipboard import st_copy_to_clipboard
-from utils.config import ASSISTANT_ID
+from utils.config import ASSISTANT_ID, ASSISTANT_NAME
 from utils.azure_open_ai import get_azure_openai_assistant, fetch_files, map_internal_references_to_file_ids
 
 client_assistant = get_azure_openai_assistant()
@@ -91,8 +91,8 @@ def process_user_input(user_input, files, display_in_chat=True):
 
 
 def display_hjælpemiddel_chat():
-    st.title("Chat med Hjælpemiddel Assistant")
-    st.write("Velkommen til chatbotten! Start en samtale nedenfor.")
+    st.title(f"Chat med {ASSISTANT_NAME}")
+    st.write("Velkommen til. Start en samtale nedenfor.")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -101,7 +101,7 @@ def display_hjælpemiddel_chat():
     if not files:
         files = {}
 
-    st.write("Eller vælg en af de prædefinerede spørgsmål:")
+    st.write("Eller start med at stille et af disse spørgsmål:")
     with st.container():
         col1, col2, col3 = st.columns(3)
         with col1:
