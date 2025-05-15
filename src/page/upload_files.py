@@ -8,7 +8,7 @@ from utils.azure_open_ai import (
     delete_file_from_vector_store,
     fetch_files_from_vector_store
 )
-from utils.config import VECTOR_STORE_ID
+from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME
 
 
 def upload_files():
@@ -43,7 +43,7 @@ def upload_files():
                                 st.error(f"Fejl under upload af fil '{uploaded_file.name}'.", icon="❌")
 
         elif content_tabs == 'TIlføj filer':
-            st.write("Tilføj eksisterende filer til Hjælpemiddel-Assistenten")
+            st.write(f"Tilføj eksisterende filer til {ASSISTANT_NAME}.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
@@ -52,7 +52,7 @@ def upload_files():
                 vector_store_name = next((name for id, name in vector_stores.items() if id == specific_vector_store_id), None)
 
                 if vector_store_name:
-                    st.write(f"Bruger den specifikke vector store: {vector_store_name}")
+                    st.write(f"Bruger den specifikke vector store: {vector_store_name}.")
                 else:
                     st.write(f"Bruger den specifikke vector store med ID: {specific_vector_store_id}")
                 vector_store_id = specific_vector_store_id
@@ -68,7 +68,7 @@ def upload_files():
             if vector_store_id:
                 files = fetch_files()
                 if files:
-                    selected_files = st.multiselect("Vælg filer", options=list(files.values()), help="Vælg de filer, du vil tilføje til Hjælpemiddel Assistenten.", placeholder="Vælg filer, du vil tilføje")
+                    selected_files = st.multiselect("Vælg filer", options=list(files.values()), help=f"Vælg de filer, du vil tilføje til {ASSISTANT_NAME}.", placeholder="Vælg filer, du vil tilføje")
                     selected_file_ids = [id for id, name in files.items() if name in selected_files]
 
                     if selected_file_ids:
@@ -84,7 +84,7 @@ def upload_files():
                     st.warning("Ingen filer fundet. Upload filer først.")
 
         elif content_tabs == 'Slet filer':
-            st.write("Slet filer fra Hjælpemiddel-Assistenten")
+            st.write(f"Slet filer fra {ASSISTANT_NAME}.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
@@ -93,7 +93,7 @@ def upload_files():
                 vector_store_name = next((name for id, name in vector_stores.items() if id == specific_vector_store_id), None)
 
                 if vector_store_name:
-                    st.write(f"Bruger den specifikke vector store: {vector_store_name}")
+                    st.write(f"Bruger den specifikke vector store: {vector_store_name}.")
                 else:
                     st.write(f"Bruger den specifikke vector store med ID: {specific_vector_store_id}")
                 vector_store_id = specific_vector_store_id
@@ -130,4 +130,4 @@ def upload_files():
                     st.warning("Ingen filer fundet. Upload filer først.")
 
     except Exception as e:
-        st.error(f'En fejl opstod: {e}')
+        st.error(f'Der opstod en fejl: {e}')

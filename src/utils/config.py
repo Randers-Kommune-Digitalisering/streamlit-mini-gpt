@@ -22,3 +22,4 @@ ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 
 ASSISTANT_NAME= os.getenv("ASSISTANT_NAME", "assistenten")
+PREDEFINED_QUESTIONS = os.getenv("PREDEFINED_QUESTIONS", "Hvad kan du hjælpe mig med?").split(";")

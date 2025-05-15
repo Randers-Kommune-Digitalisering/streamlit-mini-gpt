@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 from st_copy_to_clipboard import st_copy_to_clipboard
-from utils.config import ASSISTANT_ID, ASSISTANT_NAME
+from utils.config import ASSISTANT_ID, ASSISTANT_NAME, PREDEFINED_QUESTIONS
 from utils.azure_open_ai import get_azure_openai_assistant, fetch_files, map_internal_references_to_file_ids
 
 client_assistant = get_azure_openai_assistant()
@@ -90,7 +90,7 @@ def process_user_input(user_input, files, display_in_chat=True):
             st.error(f"Der opstod en fejl: {e}")
 
 
-def display_hjælpemiddel_chat():
+def display_assistant_chat():
     st.title(f"Chat med {ASSISTANT_NAME}")
     st.write("Velkommen til. Start en samtale nedenfor.")
 
@@ -103,16 +103,11 @@ def display_hjælpemiddel_chat():
 
     st.write("Eller start med at stille et af disse spørgsmål:")
     with st.container():
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Beskriv de væsentlige punkter for Småhjælpemidler?", type="primary"):
-                process_user_input("Beskriv de væsentlige punkter for Småhjælpemidler?", files, display_in_chat=False)
-        with col2:
-            if st.button("Hvad er email til Hjælpemiddelcenteret?", type="primary"):
-                process_user_input("Hvad er email til Hjælpemiddelcenteret?", files, display_in_chat=False)
-        with col3:
-            if st.button("Hvad kan du fortælle om Forbrugsgoder?", type="primary"):
-                process_user_input("Hvad kan du fortælle om Forbrugsgoder?", files, display_in_chat=False)
+        cols = st.columns(len(PREDEFINED_QUESTIONS))
+        for i, question in enumerate(PREDEFINED_QUESTIONS):
+            with cols[i]:
+                if st.button(question.strip(), type="primary"):
+                    process_user_input(question.strip(), files, display_in_chat=False)
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
