@@ -11,7 +11,7 @@ st.set_page_config(page_title=ASSISTANT_NAME.capitalize(), page_icon="assets/fav
 with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
-        str(ASSISTANT_NAME).capitalize(),
+        ASSISTANT_NAME[:1].upper() + ASSISTANT_NAME[1:],
         ["Chat", "Dokumenter"],
         default_index=0,
         icons=['activity', 'bi bi-file-earmark-arrow-up'],

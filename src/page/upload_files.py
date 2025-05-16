@@ -28,9 +28,9 @@ def upload_files():
         global all_files, vector_store_files
 
         if content_tabs == 'Upload':
-            st.write("Upload dine filer her")
+            st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer' fanen.")
             uploaded_files = st.file_uploader(
-                "Vælg filer for at uploade",
+                "Træk og slip, eller vælg filer",
                 type=["txt", "json", "csv", "pdf", "docx"],
                 accept_multiple_files=True,
                 help="Vælg de filer, du vil uploade til Azure OpenAI."
@@ -48,7 +48,7 @@ def upload_files():
                                 st.error(f"Fejl under upload af fil '{uploaded_file.name}'.", icon="❌")
 
         elif content_tabs == 'Tilføj filer':
-            st.write(f"Tilføj eksisterende filer til {ASSISTANT_NAME}.")
+            st.write(f"Tilføj uploadede filer til {ASSISTANT_NAME}s vidensbase.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
@@ -102,7 +102,7 @@ def upload_files():
                     st.warning("Ingen filer fundet. Upload filer først.")
 
         elif content_tabs == 'Slet filer':
-            st.write(f"Slet filer fra {ASSISTANT_NAME}.")
+            st.write(f"Slet filer fra {ASSISTANT_NAME}s vidensbase.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
