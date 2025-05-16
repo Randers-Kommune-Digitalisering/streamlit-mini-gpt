@@ -20,8 +20,8 @@ def upload_files():
     with col_1:
         content_tabs = sac.tabs([
             sac.TabsItem('Upload', icon='upload'),
-            sac.TabsItem('Tilføj filer',  icon='bi bi-file-earmark-text'),
-            sac.TabsItem('Slet filer',  icon='bi bi-trash3')
+            sac.TabsItem('Tilføj filer', icon='bi bi-file-earmark-text'),
+            sac.TabsItem('Slet filer', icon='bi bi-trash3')
         ], color='teal', size='md', position='top', align='start', use_container_width=True)
 
     try:
@@ -125,7 +125,7 @@ def upload_files():
                     vector_store_id = None
 
             if vector_store_id:
-                #files = fetch_files_from_vector_store(vector_store_id)
+                # files = fetch_files_from_vector_store(vector_store_id)
                 vector_store_files = vector_store_files or fetch_files_from_vector_store(vector_store_id)
 
                 if vector_store_files:
