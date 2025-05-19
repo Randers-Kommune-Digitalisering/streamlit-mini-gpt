@@ -109,6 +109,9 @@ def display_assistant_chat():
                 if st.button(question.strip(), use_container_width=True):
                     process_user_input(question.strip(), files, display_in_chat=False)
 
+    if len(st.session_state.messages) > 0:
+         st.warning("**Bemærk:** Svarene er computer-genererede og kan indeholde forkerte oplysninger.")
+
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
