@@ -103,7 +103,7 @@ def add_file_to_vector_store(vector_store_id, file_id):
         "file_id": file_id
     }
 
-    vector_store_name = get_vector_store_name(vector_store_id)
+    # vector_store_name = get_vector_store_name(vector_store_id)
     files = fetch_files()
     file_name = files.get(file_id, file_id)
 
@@ -121,7 +121,7 @@ def delete_file_from_vector_store(vector_store_id, file_id):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
     path = f"/openai/vector_stores/{vector_store_id}/files/{file_id}?api-version={AZURE_API_VERSION_VECTORS}"
 
-    vector_store_name = get_vector_store_name(vector_store_id)
+    # vector_store_name = get_vector_store_name(vector_store_id)
     files = fetch_files()
     file_name = files.get(file_id, file_id)
 
