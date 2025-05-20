@@ -10,11 +10,13 @@ from utils.azure_open_ai import (
 )
 from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME
 
-all_files = {}
-vector_store_files = {}
-
 
 def upload_files():
+    if 'all_files' not in st.session_state:
+        st.session_state['all_files'] = {}
+    if 'vector_store_files' not in st.session_state:
+        st.session_state['vector_store_files'] = {}
+
     col_1 = st.columns([1])[0]
 
     with col_1:
@@ -25,8 +27,6 @@ def upload_files():
         ], color='teal', size='md', position='top', align='start', use_container_width=True)
 
     try:
-        global all_files, vector_store_files
-
         if content_tabs == 'Upload':
             st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer' fanen.")
             uploaded_files = st.file_uploader(
@@ -72,14 +72,16 @@ def upload_files():
                     vector_store_id = None
 
             if vector_store_id:
-                all_files = all_files or fetch_files()
-                vector_store_files = vector_store_files or fetch_files_from_vector_store(vector_store_id)
+                if not st.session_state['all_files']:
+                    st.session_state['all_files'] = fetch_files()
+                if not st.session_state['vector_store_files']:
+                    st.session_state['vector_store_files'] = fetch_files_from_vector_store(vector_store_id)
                 files = {}
 
-                if vector_store_files:
-                    files = {file_id: file_name for file_id, file_name in all_files.items() if file_id not in vector_store_files}
+                if st.session_state['vector_store_files']:
+                    files = {file_id: file_name for file_id, file_name in st.session_state['all_files'].items() if file_id not in st.session_state['vector_store_files']}
                 else:
-                    files = all_files
+                    files = st.session_state['all_files']
 
                 if files:
                     selected_files = st.multiselect("Vælg filer",
@@ -95,7 +97,7 @@ def upload_files():
                                     result = add_file_to_vector_store(vector_store_id, file_id)
                                     if result:
                                         st.success("Filen blev tilføjet succesfuldt!", icon="✅")
-                                        vector_store_files[file_id] = files[file_id]
+                                        st.session_state['vector_store_files'][file_id] = files[file_id]
                                     else:
                                         st.error("Fejl under tilføjelse af fil.", icon="❌")
                 else:
@@ -125,17 +127,17 @@ def upload_files():
                     vector_store_id = None
 
             if vector_store_id:
-                # files = fetch_files_from_vector_store(vector_store_id)
-                vector_store_files = vector_store_files or fetch_files_from_vector_store(vector_store_id)
+                if not st.session_state['vector_store_files']:
+                    st.session_state['vector_store_files'] = fetch_files_from_vector_store(vector_store_id)
 
-                if vector_store_files:
+                if st.session_state['vector_store_files']:
                     selected_files = st.multiselect(
                         "Vælg filer",
-                        options=list(vector_store_files.values()),
+                        options=list(st.session_state['vector_store_files'].values()),
                         help="Vælg de filer, du vil slette",
                         placeholder="Vælg filer, du vil slette"
                     )
-                    selected_file_ids = [id for id, name in vector_store_files.items() if name in selected_files]
+                    selected_file_ids = [id for id, name in st.session_state['vector_store_files'].items() if name in selected_files]
 
                     if selected_file_ids:
                         if st.button("Slet valgte filer"):
@@ -144,7 +146,7 @@ def upload_files():
                                     result = delete_file_from_vector_store(vector_store_id, file_id)
                                     if result:
                                         st.success("Filen blev slettet succesfuldt!", icon="✅")
-                                        del vector_store_files[file_id]
+                                        del st.session_state['vector_store_files'][file_id]
                                     else:
                                         st.error("Fejl under sletning af fil.", icon="❌")
                 else:

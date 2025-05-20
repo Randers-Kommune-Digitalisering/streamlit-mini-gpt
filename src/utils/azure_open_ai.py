@@ -108,12 +108,12 @@ def add_file_to_vector_store(vector_store_id, file_id):
     file_name = files.get(file_id, file_id)
 
     try:
-        st.write(f"Tilføjer fil '{file_name}' til vector store '{vector_store_name}'...")
+        st.write(f"Tilføjer fil '{file_name}' til assistenten...")
         response = client.make_request(path=path, method="POST", json=payload)
-        st.write(f"Fil '{file_name}' blev tilføjet til vector store '{vector_store_name}'.")
+        # st.write(f"Fil '{file_name}' blev tilføjet til vector store '{vector_store_name}'.")
         return response
     except Exception as e:
-        st.error(f"Kunne ikke tilføje filen '{file_name}' til vector store '{vector_store_name}'. Fejl: {e}")
+        st.error(f"Kunne ikke tilføje filen '{file_name}' til assistenten. Fejl: {e}")
         return None
 
 
@@ -126,12 +126,12 @@ def delete_file_from_vector_store(vector_store_id, file_id):
     file_name = files.get(file_id, file_id)
 
     try:
-        st.write(f"Sletter fil '{file_name}' fra vector store '{vector_store_name}'...")
+        st.write(f"Sletter fil '{file_name}' fra assistenten...")
         response = client.make_request(path=path, method="DELETE")
-        st.write(f"Fil '{file_name}' blev slettet fra vector store '{vector_store_name}'.")
+        # st.write(f"Fil '{file_name}' blev slettet fra vector store '{vector_store_name}'.")
         return response
     except Exception as e:
-        st.error(f"Kunne ikke slette filen '{file_name}' fra vector store '{vector_store_name}'. Fejl: {e}")
+        st.error(f"Kunne ikke slette filen '{file_name}' fra assistenten. Fejl: {e}")
         return None
 
 
