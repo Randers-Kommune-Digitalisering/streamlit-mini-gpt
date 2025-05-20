@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 from st_copy_to_clipboard import st_copy_to_clipboard
-from utils.config import ASSISTANT_ID
+from utils.config import ASSISTANT_ID, ASSISTANT_NAME, PREDEFINED_QUESTIONS
 from utils.azure_open_ai import get_azure_openai_assistant, fetch_files, map_internal_references_to_file_ids
 
 client_assistant = get_azure_openai_assistant()
@@ -90,9 +90,9 @@ def process_user_input(user_input, files, display_in_chat=True):
             st.error(f"Der opstod en fejl: {e}")
 
 
-def display_hjælpemiddel_chat():
-    st.title("Chat med Hjælpemiddel Assistant")
-    st.write("Velkommen til chatbotten! Start en samtale nedenfor.")
+def display_assistant_chat():
+    st.title(f"Chat med {ASSISTANT_NAME}")
+    st.subheader("Start en samtale nedenfor :blush:")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -101,18 +101,16 @@ def display_hjælpemiddel_chat():
     if not files:
         files = {}
 
-    st.write("Eller vælg en af de prædefinerede spørgsmål:")
+    st.write("Eller start med at stille et af disse spørgsmål:")
     with st.container():
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Beskriv de væsentlige punkter for Småhjælpemidler?", type="primary"):
-                process_user_input("Beskriv de væsentlige punkter for Småhjælpemidler?", files, display_in_chat=False)
-        with col2:
-            if st.button("Hvad er email til Hjælpemiddelcenteret?", type="primary"):
-                process_user_input("Hvad er email til Hjælpemiddelcenteret?", files, display_in_chat=False)
-        with col3:
-            if st.button("Hvad kan du fortælle om Forbrugsgoder?", type="primary"):
-                process_user_input("Hvad kan du fortælle om Forbrugsgoder?", files, display_in_chat=False)
+        cols = st.columns(len(PREDEFINED_QUESTIONS))
+        for i, question in enumerate(PREDEFINED_QUESTIONS):
+            with cols[i]:
+                if st.button(question.strip(), use_container_width=True):
+                    process_user_input(question.strip(), files, display_in_chat=False)
+
+    if len(st.session_state.messages) > 0:
+        st.warning("**Bemærk:** Svarene er computer-genererede og kan indeholde forkerte oplysninger.")
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
