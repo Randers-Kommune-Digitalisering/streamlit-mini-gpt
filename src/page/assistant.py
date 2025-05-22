@@ -13,7 +13,7 @@ def process_user_input(user_input, files, display_in_chat=True):
     is_content_illegal, content_warning = contains_illegal_contents(user_input)
 
     if is_content_illegal:
-        st.error(content_warning)
+        st.error("**Advarsel:** " + content_warning)
         return
 
     st.session_state.messages.append({"role": "user", "content": user_input})
