@@ -3,11 +3,18 @@ import time
 from st_copy_to_clipboard import st_copy_to_clipboard
 from utils.config import ASSISTANT_ID, ASSISTANT_NAME, PREDEFINED_QUESTIONS
 from utils.azure_open_ai import get_azure_openai_assistant, fetch_files, map_internal_references_to_file_ids
+from utils.input_filter import contains_illegal_contents
 
 client_assistant = get_azure_openai_assistant()
 
 
 def process_user_input(user_input, files, display_in_chat=True):
+
+    is_content_illegal, content_warning = contains_illegal_contents(user_input)
+
+    if is_content_illegal:
+        st.error(content_warning)
+        return
 
     st.session_state.messages.append({"role": "user", "content": user_input})
 
