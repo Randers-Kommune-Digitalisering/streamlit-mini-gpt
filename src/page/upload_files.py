@@ -8,7 +8,12 @@ from utils.azure_open_ai import (
     delete_file_from_vector_store,
     fetch_files_from_vector_store
 )
-from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME
+from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME, ASSISTANT_ID
+from utils.db_connection import get_db_client
+from datetime import datetime
+from controllers.file_controller import create_file, get_files_by_assistant
+
+db_client = get_db_client()
 
 
 def upload_files():
@@ -42,10 +47,29 @@ def upload_files():
                         for uploaded_file in uploaded_files:
                             st.write(f"Uploader filen: {uploaded_file.name}")
                             result = add_file_to_assistant(uploaded_file)
-                            if result:
+                            st.write(f"Azure response: {result}")  # Debug: show the Azure response
+                            azure_file_id = None
+                            if isinstance(result, dict):
+                                # Try common keys for Azure file ID
+                                azure_file_id = result.get('id') or result.get('file_id') or result.get('fileId')
+                            elif isinstance(result, str):
+                                azure_file_id = result
+                            if azure_file_id:
+                                try:
+                                    create_file(
+                                        assistant_id=ASSISTANT_ID,
+                                        azure_file_id=azure_file_id,
+                                        name=uploaded_file.name,
+                                        type_=uploaded_file.type or '',
+                                        size=uploaded_file.size,
+                                        timestamp=datetime.utcnow()
+                                    )
+                                    st.success(f"Filen '{uploaded_file.name}' blev uploadet og tilføjet til databasen!", icon="✅")
+                                except Exception as db_e:
+                                    st.warning(f"Database-fejl: {db_e}", icon="⚠️")
                                 st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
                             else:
-                                st.error(f"Fejl under upload af fil '{uploaded_file.name}'.", icon="❌")
+                                st.error(f"Fejl: Azure file ID mangler for '{uploaded_file.name}'. Filen blev ikke gemt i databasen.", icon="❌")
 
         elif content_tabs == 'Tilføj filer':
             st.write(f"Tilføj uploadede filer til {ASSISTANT_NAME}s vidensbase.")
@@ -73,7 +97,16 @@ def upload_files():
 
             if vector_store_id:
                 if not st.session_state['all_files']:
-                    st.session_state['all_files'] = fetch_files()
+                    # Fetch files from Azure OpenAI
+                    azure_files = fetch_files()
+                    # Fetch files from DB for this assistant
+                    try:
+                        db_files = get_files_by_assistant(ASSISTANT_ID)
+                    except Exception:
+                        db_files = []
+                    db_azure_file_ids = set(f['azure_file_id'] for f in db_files if f.get('azure_file_id'))
+                    filtered_files = {fid: fname for fid, fname in azure_files.items() if fid in db_azure_file_ids}
+                    st.session_state['all_files'] = filtered_files
                 if not st.session_state['vector_store_files']:
                     st.session_state['vector_store_files'] = fetch_files_from_vector_store(vector_store_id)
                 files = {}

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from utils.database import DatabaseClient
+from utils.database_simple import DatabaseClient
 
 
 def test_invalid_db_type():
