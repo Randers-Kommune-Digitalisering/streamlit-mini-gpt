@@ -33,7 +33,7 @@ def upload_files():
 
     try:
         if content_tabs == 'Upload':
-            st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer' fanen.")
+            st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer'-fanen.")
             uploaded_files = st.file_uploader(
                 "Træk og slip, eller vælg filer",
                 type=["txt", "json", "csv", "pdf", "docx"],
@@ -49,7 +49,6 @@ def upload_files():
                             result = add_file_to_assistant(uploaded_file)
                             azure_file_id = None
                             if isinstance(result, dict):
-                                # Try common keys for Azure file ID
                                 azure_file_id = result.get('id') or result.get('file_id') or result.get('fileId')
                             elif isinstance(result, str):
                                 azure_file_id = result
@@ -66,7 +65,6 @@ def upload_files():
                                     st.success(f"Filen '{uploaded_file.name}' blev uploadet og tilføjet til databasen!", icon="✅")
                                 except Exception as db_e:
                                     st.warning(f"Database-fejl: {db_e}", icon="⚠️")
-                                # st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
                             else:
                                 st.error(f"Fejl: Azure file ID mangler for '{uploaded_file.name}'. Filen blev ikke gemt i databasen.", icon="❌")
 
@@ -96,9 +94,7 @@ def upload_files():
 
             if vector_store_id:
                 if not st.session_state['all_files']:
-                    # Fetch files from Azure OpenAI
                     azure_files = fetch_files()
-                    # Fetch files from DB for this assistant
                     try:
                         db_files = get_files_by_assistant(ASSISTANT_ID)
                     except Exception:
@@ -167,13 +163,13 @@ def upload_files():
                         "Vælg filer",
                         options=list(st.session_state['vector_store_files'].values()),
                         help="Vælg de filer, du vil fjerne fra assistens vidensbase, eller slette helt fra databasen.",
-                        placeholder="Vælg filer, du vil fjerne"
+                        placeholder="Vælg filer, du vil fjerne eller slette"
                     )
                     selected_file_ids = [id for id, name in st.session_state['vector_store_files'].items() if name in selected_files]
 
                     if selected_file_ids:
                         delete_from_openai = False
-                        if st.checkbox(f"Slet fil{'er' if len(selected_file_ids) > 1 else ''} fra databasen", value=False, help="Marker for at slette filen fra databasen. Filer der slettes fra databasen vil skulle uploades igen før de er tilgængelige igen."):
+                        if st.checkbox(f"Slet fil{'er' if len(selected_file_ids) > 1 else ''} fra databasen", value=False, help="Marker for at slette filen fra databasen. Filer der slettes fra databasen vil ikke længere være tilgængelige under 'Tilføj filer'-fanen."):
                             delete_from_openai = True
 
                         if st.button(f"{'Slet' if delete_from_openai else 'Fjern'} valgte fil{'er' if len(selected_file_ids) > 1 else ''}"):
