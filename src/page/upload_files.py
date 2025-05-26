@@ -47,7 +47,6 @@ def upload_files():
                         for uploaded_file in uploaded_files:
                             st.write(f"Uploader filen: {uploaded_file.name}")
                             result = add_file_to_assistant(uploaded_file)
-                            st.write(f"Azure response: {result}")  # Debug: show the Azure response
                             azure_file_id = None
                             if isinstance(result, dict):
                                 # Try common keys for Azure file ID
@@ -67,7 +66,7 @@ def upload_files():
                                     st.success(f"Filen '{uploaded_file.name}' blev uploadet og tilføjet til databasen!", icon="✅")
                                 except Exception as db_e:
                                     st.warning(f"Database-fejl: {db_e}", icon="⚠️")
-                                st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
+                                # st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
                             else:
                                 st.error(f"Fejl: Azure file ID mangler for '{uploaded_file.name}'. Filen blev ikke gemt i databasen.", icon="❌")
 
