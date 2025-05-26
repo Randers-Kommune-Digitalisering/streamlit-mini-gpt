@@ -11,7 +11,7 @@ class DatabaseClient:
         elif db_type.lower() == 'postgresql':
             driver = 'postgresql+psycopg2'
         else:
-            raise ValueError(f"Invalid database type {type}")
+            raise ValueError(f"Invalid database type {db_type}")
 
         self.logger = logging.getLogger(__name__)
 
