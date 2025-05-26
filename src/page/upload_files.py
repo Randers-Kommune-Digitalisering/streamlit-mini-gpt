@@ -11,7 +11,7 @@ from utils.azure_open_ai import (
 from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME, ASSISTANT_ID
 from utils.db_connection import get_db_client
 from datetime import datetime
-from controllers.file_controller import create_file, get_files_by_assistant
+from controllers.file_controller import create_file, get_files_by_assistant, delete_file
 
 db_client = get_db_client()
 
@@ -136,7 +136,7 @@ def upload_files():
                     st.warning("Ingen filer fundet. Upload filer først.")
 
         elif content_tabs == 'Slet filer':
-            st.write(f"Slet filer fra {ASSISTANT_NAME}s vidensbase.")
+            st.write(f"Fjern filer fra {ASSISTANT_NAME}s vidensbase.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
@@ -166,19 +166,34 @@ def upload_files():
                     selected_files = st.multiselect(
                         "Vælg filer",
                         options=list(st.session_state['vector_store_files'].values()),
-                        help="Vælg de filer, du vil slette",
-                        placeholder="Vælg filer, du vil slette"
+                        help="Vælg de filer, du vil fjerne fra assistens vidensbase, eller slette helt fra databasen.",
+                        placeholder="Vælg filer, du vil fjerne"
                     )
                     selected_file_ids = [id for id, name in st.session_state['vector_store_files'].items() if name in selected_files]
 
                     if selected_file_ids:
-                        if st.button("Slet valgte filer"):
-                            with st.spinner("Sletter filer..."):
+                        delete_from_openai = False
+                        if st.checkbox(f"Slet fil{'er' if len(selected_file_ids) > 1 else ''} fra databasen", value=False, help="Marker for at slette filen fra databasen. Filer der slettes fra databasen vil skulle uploades igen før de er tilgængelige igen."):
+                            delete_from_openai = True
+
+                        if st.button(f"{'Slet' if delete_from_openai else 'Fjern'} valgte fil{'er' if len(selected_file_ids) > 1 else ''}"):
+                            with st.spinner(f"Fjerner fil{'er' if len(selected_file_ids) > 1 else ''}..."):
                                 for file_id in selected_file_ids:
-                                    result = delete_file_from_vector_store(vector_store_id, file_id)
+                                    result = delete_file_from_vector_store(vector_store_id, file_id, delete_from_openai)
+
                                     if result:
-                                        st.success("Filen blev slettet succesfuldt!", icon="✅")
-                                        del st.session_state['vector_store_files'][file_id]
+                                        if delete_from_openai:
+                                            try:
+                                                delete_file(file_id)
+                                                st.success("Filen blev slettet succesfuldt!", icon="✅")
+                                            except Exception as db_e:
+                                                st.warning(f"Database-fejl: {db_e}", icon="⚠️")
+                                        else:
+                                            st.success("Filen blev fjernet succesfuldt!", icon="✅")
+                                        # Find the key in vector_store_files where azure_file_id matches file_id
+                                        key_to_delete = next((k for k, v in st.session_state['vector_store_files'].items() if k == file_id or (isinstance(v, dict) and v.get('azure_file_id') == file_id)), None)
+                                        if key_to_delete:
+                                            del st.session_state['vector_store_files'][key_to_delete]
                                     else:
                                         st.error("Fejl under sletning af fil.", icon="❌")
                 else:

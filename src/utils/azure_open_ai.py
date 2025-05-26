@@ -102,18 +102,22 @@ def add_file_to_vector_store(vector_store_id, file_id):
         return None
 
 
-def delete_file_from_vector_store(vector_store_id, file_id):
+def delete_file_from_vector_store(vector_store_id, file_id, delete_from_openai=False):
     client = APIClient(base_url=AZURE_OPENAI_ENDPOINT, api_key=AZURE_OPENAI_KEY)
     path = f"/openai/vector_stores/{vector_store_id}/files/{file_id}?api-version={AZURE_API_VERSION_VECTORS}"
 
-    # vector_store_name = get_vector_store_name(vector_store_id)
     files = fetch_files()
     file_name = files.get(file_id, file_id)
 
     try:
-        st.write(f"Sletter fil '{file_name}' fra assistenten...")
+        st.write(f"Fjerner fil '{file_name}' fra assistenten...")
         response = client.make_request(path=path, method="DELETE")
-        # st.write(f"Fil '{file_name}' blev slettet fra vector store '{vector_store_name}'.")
+
+        if delete_from_openai:
+            st.write(f"Sletter fil '{file_name}' fra databasen...")
+            delete_path = f"/openai/files/{file_id}?api-version={AZURE_API_VERSION_FILES}"
+            client.make_request(path=delete_path, method="DELETE")
+
         return response
     except Exception as e:
         st.error(f"Kunne ikke slette filen '{file_name}' fra assistenten. Fejl: {e}")

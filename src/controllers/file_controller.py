@@ -65,10 +65,10 @@ def update_file(file_id, **kwargs):
         session.close()
 
 
-def delete_file(file_id):
+def delete_file(azure_file_id):
     session = db_client.get_session()
     try:
-        file = session.query(File).filter_by(file_id=file_id).first()
+        file = session.query(File).filter_by(azure_file_id=azure_file_id).first()
         if not file:
             raise ValueError("File not found")
         session.delete(file)
