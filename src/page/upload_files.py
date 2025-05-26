@@ -10,6 +10,7 @@ from utils.azure_open_ai import (
 )
 from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME, ASSISTANT_ID
 from utils.db_connection import get_db_client
+from utils.parse import parse_filename
 from datetime import datetime
 from controllers.file_controller import create_file, get_files_by_assistant, delete_file
 
@@ -45,6 +46,7 @@ def upload_files():
                 if st.button("Upload"):
                     with st.spinner("Uploader filer..."):
                         for uploaded_file in uploaded_files:
+                            uploaded_file.name = parse_filename(uploaded_file.name)
                             st.write(f"Uploader filen: {uploaded_file.name}")
                             result = add_file_to_assistant(uploaded_file)
                             azure_file_id = None
@@ -62,6 +64,8 @@ def upload_files():
                                         size=uploaded_file.size,
                                         timestamp=datetime.utcnow()
                                     )
+                                    if st.session_state['all_files']:
+                                        st.session_state['all_files'][azure_file_id] = uploaded_file.name
                                     st.success(f"Filen '{uploaded_file.name}' blev uploadet og tilføjet til databasen!", icon="✅")
                                 except Exception as db_e:
                                     st.warning(f"Database-fejl: {db_e}", icon="⚠️")
@@ -126,6 +130,7 @@ def upload_files():
                                     if result:
                                         st.success("Filen blev tilføjet succesfuldt!", icon="✅")
                                         st.session_state['vector_store_files'][file_id] = files[file_id]
+                                        # del st.session_state['all_files'][file_id]
                                     else:
                                         st.error("Fejl under tilføjelse af fil.", icon="❌")
                 else:
@@ -182,14 +187,13 @@ def upload_files():
                                             try:
                                                 delete_file(file_id)
                                                 st.success("Filen blev slettet succesfuldt!", icon="✅")
+                                                del st.session_state['all_files'][file_id]
                                             except Exception as db_e:
                                                 st.warning(f"Database-fejl: {db_e}", icon="⚠️")
                                         else:
                                             st.success("Filen blev fjernet succesfuldt!", icon="✅")
-                                        # Find the key in vector_store_files where azure_file_id matches file_id
-                                        key_to_delete = next((k for k, v in st.session_state['vector_store_files'].items() if k == file_id or (isinstance(v, dict) and v.get('azure_file_id') == file_id)), None)
-                                        if key_to_delete:
-                                            del st.session_state['vector_store_files'][key_to_delete]
+                                            # st.session_state['all_files'][file_id] = st.session_state['vector_store_files'][file_id]
+                                        del st.session_state['vector_store_files'][file_id]
                                     else:
                                         st.error("Fejl under sletning af fil.", icon="❌")
                 else:
