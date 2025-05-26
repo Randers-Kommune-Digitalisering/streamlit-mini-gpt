@@ -16,3 +16,6 @@ altair==5.2.0
 pymysql
 openai
 st_copy_to_clipboard
+psycopg2
+paramiko
+pysftp

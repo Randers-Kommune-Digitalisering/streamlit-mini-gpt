@@ -8,7 +8,13 @@ from utils.azure_open_ai import (
     delete_file_from_vector_store,
     fetch_files_from_vector_store
 )
-from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME
+from utils.config import VECTOR_STORE_ID, ASSISTANT_NAME, ASSISTANT_ID
+from utils.db_connection import get_db_client
+from utils.parse import parse_filename
+from datetime import datetime
+from controllers.file_controller import create_file, get_files_by_assistant, delete_file
+
+db_client = get_db_client()
 
 
 def upload_files():
@@ -28,7 +34,7 @@ def upload_files():
 
     try:
         if content_tabs == 'Upload':
-            st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer' fanen.")
+            st.write("Upload dine filer her. Filerne kan herefter tilføjes til assistenten under 'Tilføj filer'-fanen.")
             uploaded_files = st.file_uploader(
                 "Træk og slip, eller vælg filer",
                 type=["txt", "json", "csv", "pdf", "docx"],
@@ -40,12 +46,31 @@ def upload_files():
                 if st.button("Upload"):
                     with st.spinner("Uploader filer..."):
                         for uploaded_file in uploaded_files:
+                            uploaded_file.name = parse_filename(uploaded_file.name)
                             st.write(f"Uploader filen: {uploaded_file.name}")
                             result = add_file_to_assistant(uploaded_file)
-                            if result:
-                                st.success(f"Filen '{uploaded_file.name}' blev uploadet succesfuldt til Azure OpenAI!", icon="✅")
+                            azure_file_id = None
+                            if isinstance(result, dict):
+                                azure_file_id = result.get('id') or result.get('file_id') or result.get('fileId')
+                            elif isinstance(result, str):
+                                azure_file_id = result
+                            if azure_file_id:
+                                try:
+                                    create_file(
+                                        assistant_id=ASSISTANT_ID,
+                                        azure_file_id=azure_file_id,
+                                        name=uploaded_file.name,
+                                        type_=uploaded_file.type or '',
+                                        size=uploaded_file.size,
+                                        timestamp=datetime.utcnow()
+                                    )
+                                    if st.session_state['all_files']:
+                                        st.session_state['all_files'][azure_file_id] = uploaded_file.name
+                                    st.success(f"Filen '{uploaded_file.name}' blev uploadet og tilføjet til databasen!", icon="✅")
+                                except Exception as db_e:
+                                    st.warning(f"Database-fejl: {db_e}", icon="⚠️")
                             else:
-                                st.error(f"Fejl under upload af fil '{uploaded_file.name}'.", icon="❌")
+                                st.error(f"Fejl: Azure file ID mangler for '{uploaded_file.name}'. Filen blev ikke gemt i databasen.", icon="❌")
 
         elif content_tabs == 'Tilføj filer':
             st.write(f"Tilføj uploadede filer til {ASSISTANT_NAME}s vidensbase.")
@@ -73,7 +98,14 @@ def upload_files():
 
             if vector_store_id:
                 if not st.session_state['all_files']:
-                    st.session_state['all_files'] = fetch_files()
+                    azure_files = fetch_files()
+                    try:
+                        db_files = get_files_by_assistant(ASSISTANT_ID)
+                    except Exception:
+                        db_files = []
+                    db_azure_file_ids = set(f['azure_file_id'] for f in db_files if f.get('azure_file_id'))
+                    filtered_files = {fid: fname for fid, fname in azure_files.items() if fid in db_azure_file_ids}
+                    st.session_state['all_files'] = filtered_files
                 if not st.session_state['vector_store_files']:
                     st.session_state['vector_store_files'] = fetch_files_from_vector_store(vector_store_id)
                 files = {}
@@ -98,13 +130,14 @@ def upload_files():
                                     if result:
                                         st.success("Filen blev tilføjet succesfuldt!", icon="✅")
                                         st.session_state['vector_store_files'][file_id] = files[file_id]
+                                        # del st.session_state['all_files'][file_id]
                                     else:
                                         st.error("Fejl under tilføjelse af fil.", icon="❌")
                 else:
                     st.warning("Ingen filer fundet. Upload filer først.")
 
         elif content_tabs == 'Slet filer':
-            st.write(f"Slet filer fra {ASSISTANT_NAME}s vidensbase.")
+            st.write(f"Fjern filer fra {ASSISTANT_NAME}s vidensbase.")
 
             specific_vector_store_id = VECTOR_STORE_ID
 
@@ -134,18 +167,32 @@ def upload_files():
                     selected_files = st.multiselect(
                         "Vælg filer",
                         options=list(st.session_state['vector_store_files'].values()),
-                        help="Vælg de filer, du vil slette",
-                        placeholder="Vælg filer, du vil slette"
+                        help="Vælg de filer, du vil fjerne fra assistens vidensbase, eller slette helt fra databasen.",
+                        placeholder="Vælg filer, du vil fjerne eller slette"
                     )
                     selected_file_ids = [id for id, name in st.session_state['vector_store_files'].items() if name in selected_files]
 
                     if selected_file_ids:
-                        if st.button("Slet valgte filer"):
-                            with st.spinner("Sletter filer..."):
+                        delete_from_openai = False
+                        if st.checkbox(f"Slet fil{'er' if len(selected_file_ids) > 1 else ''} fra databasen", value=False, help="Marker for at slette filen fra databasen. Filer der slettes fra databasen vil ikke længere være tilgængelige under 'Tilføj filer'-fanen."):
+                            delete_from_openai = True
+
+                        if st.button(f"{'Slet' if delete_from_openai else 'Fjern'} valgte fil{'er' if len(selected_file_ids) > 1 else ''}"):
+                            with st.spinner(f"Fjerner fil{'er' if len(selected_file_ids) > 1 else ''}..."):
                                 for file_id in selected_file_ids:
-                                    result = delete_file_from_vector_store(vector_store_id, file_id)
+                                    result = delete_file_from_vector_store(vector_store_id, file_id, delete_from_openai)
+
                                     if result:
-                                        st.success("Filen blev slettet succesfuldt!", icon="✅")
+                                        if delete_from_openai:
+                                            try:
+                                                delete_file(file_id)
+                                                st.success("Filen blev slettet succesfuldt!", icon="✅")
+                                                del st.session_state['all_files'][file_id]
+                                            except Exception as db_e:
+                                                st.warning(f"Database-fejl: {db_e}", icon="⚠️")
+                                        else:
+                                            st.success("Filen blev fjernet succesfuldt!", icon="✅")
+                                            # st.session_state['all_files'][file_id] = st.session_state['vector_store_files'][file_id]
                                         del st.session_state['vector_store_files'][file_id]
                                     else:
                                         st.error("Fejl under sletning af fil.", icon="❌")

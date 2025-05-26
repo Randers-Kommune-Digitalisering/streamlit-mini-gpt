@@ -6,7 +6,7 @@ from page.assistant import display_assistant_chat
 from page.upload_files import upload_files
 
 
-st.set_page_config(page_title=ASSISTANT_NAME.capitalize(), page_icon="assets/favicon.ico")
+st.set_page_config(page_title=(ASSISTANT_NAME[:1].upper() + ASSISTANT_NAME[1:]), page_icon="assets/favicon.ico")
 
 with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
