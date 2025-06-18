@@ -80,8 +80,9 @@ Løsningen er designet til at blive deployet på Kubernetes (K8s) ved hjælp af 
 
 1. **Opret assistent samt vector store i Azure OpenAI:**
 
-   - Tilgå Azure OpenAI, og opret en ny assistent samt en dertilhørende vektor store.
-   - Noter ID på både assistenten og vektor store.
+   - Tilgå Azure OpenAI, og opret en ny assistent samt en dertilhørende vector store.
+   - Aktiver 'File search' for assistenten, og vælg den tilhørende vector store.
+   - Noter ID på både assistenten og vector store.
 
 2. **Vælg version:**
 
